@@ -1,0 +1,32 @@
+name: repro
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  repro:
+    name: ${{ matrix.name }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Fails: the first restart keeps the old value.
+          - name: vite app (root is not the working directory)
+            script: repro
+          # Fails: rootDir does not help once _VARLOCK_ENV_KEY is set.
+          - name: vite app with rootDir and _VARLOCK_ENV_KEY
+            script: repro:root-dir
+          # Passes: the same project, started from app/.
+          - name: cd app && vite (control)
+            script: control
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run ${{ matrix.script }}

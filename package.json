@@ -1,0 +1,15 @@
+{
+  "name": "varlock-vite-first-restart-stale-env",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "repro": "node repro.mjs",
+    "repro:root-dir": "node repro.mjs --root-dir",
+    "control": "node repro.mjs --cwd-is-root"
+  },
+  "devDependencies": {
+    "@varlock/vite-integration": "1.5.5",
+    "varlock": "1.24.0",
+    "vite": "8.3.5"
+  }
+}
