@@ -5,7 +5,8 @@
   "scripts": {
     "repro": "node repro.mjs",
     "repro:root-dir": "node repro.mjs --root-dir",
-    "control": "node repro.mjs --cwd-is-root"
+    "control": "node repro.mjs --cwd-is-root",
+    "compare": "bash compare.sh"
   },
   "devDependencies": {
     "@varlock/vite-integration": "1.5.5",

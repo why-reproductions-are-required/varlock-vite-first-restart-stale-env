@@ -1,6 +1,8 @@
-# @varlock/vite-integration: the first dev server restart keeps stale env values when Vite's root is not the working directory
+# @varlock/vite-integration: the first dev server restart keeps stale env values when Vite's root is not the working directory (regression in 1.5.0)
 
 When Vite's root is not the working directory, as with `vite app`, the varlock Vite plugin does not reload the env on the first dev server restart. A change to `.env.local` restarts the server, but `ENV.*` keeps the old value. The second change and every later change load correctly.
+
+This is a regression in `@varlock/vite-integration@1.5.0`, from [dmno-dev/varlock#985](https://github.com/dmno-dev/varlock/pull/985). See [Regression in 1.5.0](#regression-in-150).
 
 [![repro](https://github.com/why-reproductions-are-required/varlock-vite-first-restart-stale-env/actions/workflows/repro.yml/badge.svg)](https://github.com/why-reproductions-are-required/varlock-vite-first-restart-stale-env/actions/workflows/repro.yml)
 
@@ -49,6 +51,17 @@ The `No .env files found` warning in the output is expected for this layout. The
 ## Control
 
 `npm run control` starts the same project with `cd app && vite`. Every restart loads the new value, and the script exits with code 0.
+
+## Regression in 1.5.0
+
+`npm run compare` runs the same reproduction with `@varlock/vite-integration@1.4.0` and `1.5.0`. Both use `varlock@1.17.1` and `vite@8.3.5`:
+
+| `@varlock/vite-integration` | `restart 1` value | Result |
+| --- | --- | --- |
+| 1.4.0 | `second` | pass |
+| 1.5.0 | `first` | stale |
+
+`1.5.0` is the first release that contains [#985](https://github.com/dmno-dev/varlock/pull/985). Before #985, the hook compared the root with `process.cwd()` ([source](https://github.com/dmno-dev/varlock/blob/1277ae4d139c5e44aa56be4c196d49dc1cfeda99/packages/integrations/vite/src/index.ts#L454-L471)). With `vite app`, the root is never the working directory, so the first branch reloaded on every call, restarts included. #985 changed the check to compare with `loadedConfigDir`, the directory of the last load. #985 also added the `rootDir` option, so the second trigger below did not exist before it.
 
 ## Second trigger: `rootDir` with `_VARLOCK_ENV_KEY` set
 
